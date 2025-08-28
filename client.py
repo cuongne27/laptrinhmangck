@@ -20,6 +20,7 @@ class TicTacToeClient:
 
         self.root = tk.Tk()
         self.root.title(f"Tic Tac Toe - Player {self.player}")
+        self.root.resizable(False, False)  # Không cho chỉnh kích thước cửa sổ
         self.buttons = []
         for i in range(3):
             for j in range(3):

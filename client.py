@@ -28,6 +28,10 @@ class TicTacToeClient:
                 btn.grid(row=i, column=j)
                 self.buttons.append(btn)
 
+        # Thông báo cho người chơi 1 chờ người chơi 2
+        if self.player == 'X':
+            self.root.after(100, lambda: messagebox.showinfo("Chờ đối thủ", "Đang chờ người chơi khác tham gia..."))
+
         threading.Thread(target=self.receive, daemon=True).start()
         self.root.mainloop()
 
@@ -68,9 +72,13 @@ class TicTacToeClient:
             self.buttons[i]['text'] = self.board[i]
             state = 'normal' if self.board[i] == ' ' and self.player == self.current_player else 'disabled'
             self.buttons[i]['state'] = state
+        # Show whose turn it is
+        self.root.title(f"Tic Tac Toe - Player {self.player} ({'Your turn' if self.player == self.current_player else 'Waiting...'})")
 
     def make_move(self, pos):
         if self.board[pos] == ' ' and self.player == self.current_player:
+            for btn in self.buttons:
+                btn['state'] = 'disabled'  # Disable all buttons until server responds
             try:
                 self.sock.send(str(pos).encode())
             except socket.error as e:

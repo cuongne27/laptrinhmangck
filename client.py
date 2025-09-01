@@ -5,7 +5,8 @@ import threading
 
 class TicTacToeClient:
     def __init__(self, host='localhost', port=5000, udp_port=5001):
-        self.host = self.discover_server(udp_port) or host  # Tìm server qua UDP
+        # Tìm server qua UDP hoặc dùng host mặc định
+        self.host = self.discover_server(udp_port) or host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4096)
@@ -49,7 +50,7 @@ class TicTacToeClient:
 
         self.chat_entry = tk.Entry(chat_frame, width=25, font=('Helvetica', 12))
         self.chat_entry.pack(side='left', pady=5)
-        self.chat_entry.bind('<Return>', lambda event: self.send_chat())  # Thêm dòng này
+        self.chat_entry.bind('<Return>', lambda event: self.send_chat())
         self.send_btn = tk.Button(chat_frame, text="Gửi", command=self.send_chat)
         self.send_btn.pack(side='left', padx=5)
 
@@ -57,7 +58,7 @@ class TicTacToeClient:
         self.root.mainloop()
 
     def discover_server(self, udp_port):
-        # Sử dụng UDP để tìm server (bao quát UDP discovery)
+        # Tìm địa chỉ server qua UDP broadcast
         udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp_sock.bind(('', udp_port))
         udp_sock.settimeout(10)
@@ -72,6 +73,7 @@ class TicTacToeClient:
         return None
 
     def receive(self):
+        # Nhận dữ liệu từ server (bàn cờ hoặc chat)
         while True:
             try:
                 data = self.sock.recv(2048).decode()
@@ -93,6 +95,7 @@ class TicTacToeClient:
                 break
 
     def update_board(self):
+        # Cập nhật giao diện bàn cờ và trạng thái nút
         for i in range(9):
             self.buttons[i]['text'] = self.board[i]
             state = 'normal' if self.board[i] == ' ' and self.player == self.current_player else 'disabled'
@@ -100,6 +103,7 @@ class TicTacToeClient:
         self.root.title(f"Tic Tac Toe - Player {self.player} ({'Your turn' if self.player == self.current_player else 'Waiting...'})")
 
     def make_move(self, pos):
+        # Gửi nước đi lên server nếu là lượt của mình
         if self.board[pos] == ' ' and self.player == self.current_player:
             for btn in self.buttons:
                 btn['state'] = 'disabled'
@@ -109,6 +113,7 @@ class TicTacToeClient:
                 print(f"Send move error: {e}")
 
     def send_chat(self):
+        # Gửi tin nhắn chat lên server
         msg = self.chat_entry.get().strip()
         if msg:
             try:
@@ -118,6 +123,7 @@ class TicTacToeClient:
                 print(f"Send chat error: {e}")
 
     def update_chat(self, msg):
+        # Hiển thị lịch sử chat
         self.chat_history['state'] = 'normal'
         self.chat_history.insert(tk.END, msg + '\n')
         self.chat_history['state'] = 'disabled'
@@ -125,3 +131,4 @@ class TicTacToeClient:
 
 if __name__ == '__main__':
     client = TicTacToeClient()
+

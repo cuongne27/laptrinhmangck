@@ -1,0 +1,73 @@
+@startuml
+title **Sơ đồ kết nối Client-Server cho Game TicTacToe**
+
+|Client|
+start
+:Khởi tạo client;
+:Tìm server qua UDP broadcast;
+note right
+    Gửi broadcast đến port 5001
+    Chờ phản hồi "SERVER_AT:5000"
+end note
+
+|Server|
+start
+:Khởi tạo server;
+:Broadcast UDP mỗi 5s;
+note left
+    Gửi "SERVER_AT:5000"
+    đến <broadcast>:5001
+end note
+
+|Client|
+:Kết nối TCP đến server;
+:Nhận ký hiệu player (X/O);
+:Hiển thị giao diện game;
+:Tạo thread nhận dữ liệu;
+
+|Server|
+:Chờ 2 client kết nối;
+:Gán ký hiệu X/O;
+:Tạo thread xử lý client;
+
+repeat
+  |Client|
+  while (Lượt của player?) is (Có)
+    :Người chơi nhập nước đi;
+    :Gửi vị trí đến server;
+  end while
+
+  |Server|
+  :Kiểm tra nước đi hợp lệ;
+  :Cập nhật bảng game;
+  :Kiểm tra người thắng;
+  if (Có người thắng?) then
+    :Gửi thông báo chiến thắng;
+    break
+  else if (Hòa?) then
+    :Gửi thông báo hòa;
+    break
+  else
+    :Đổi lượt chơi;
+    :Gửi trạng thái board;
+  endif
+
+  |Client|
+  :Cập nhật giao diện board;
+  :Hiển thị trạng thái lượt;
+
+  |#AntiqueWhite|Chat|
+  :Client gửi tin nhắn chat;
+  :Server broadcast đến cả hai;
+  :Client hiển thị tin nhắn;
+
+repeat while (Game chưa kết thúc?)
+
+|Client|
+:Đóng kết nối;
+stop
+
+|Server|
+:Đóng kết nối;
+stop
+@enduml
